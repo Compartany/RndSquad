@@ -4,10 +4,11 @@ MOD：真随机战队
 基于：Into the Breach v1.2.24，Mod Loader v2.5.4，modApiExt v1.13
 代码：https://github.com/Compartany/RndSquad
 链接：
-    [CN] TODO
-    [EN] TODO
+    [CN] https://www.bilibili.com/read/cv9495097
+    [EN] https://subsetgames.com/forum/viewtopic.php?f=25&t=36616
 下载：
     [github] https://github.com/Compartany/RndSquad/releases
+    [weiyun] https://share.weiyun.com/7laJWpe3 （备用）
 
 这些机甲掌握了随机的规律，它们总能从随机中找出最有用的武器。
 

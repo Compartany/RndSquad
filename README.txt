@@ -4,10 +4,11 @@ Version: See [version.txt]
 Base: Into the Breach v1.2.24, Mod Loader v2.5.4, modApiExt v1.13
 Code: https://github.com/Compartany/RndSquad
 Link:
-    [EN] TODO
-    [CN] TODO
+    [EN] https://subsetgames.com/forum/viewtopic.php?f=25&t=36616
+    [CN] https://www.bilibili.com/read/cv9495097
 Download:
     [github] https://github.com/Compartany/RndSquad/releases
+    [weiyun] https://share.weiyun.com/7laJWpe3 (alternate)
 
 These Mechs have mastered the laws of randomness, and they can always find the most useful weapons from randomness.
 
