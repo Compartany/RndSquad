@@ -1,0 +1,28 @@
+MOD：真随机战队
+作者：Compartany
+版本：见【version.txt】
+基于：Into the Breach v1.2.24，Mod Loader v2.5.4，modApiExt v1.13
+代码：https://github.com/Compartany/RndSquad
+链接：
+    [CN] TODO
+    [EN] TODO
+下载：
+    [github] https://github.com/Compartany/RndSquad/releases
+
+这些机甲掌握了随机的规律，它们总能从随机中找出最有用的武器。
+
+【警告】请务必将 MOD【环境操纵者】升级至 v2.2.3 或更新的版本，否则会有代码冲突！
+
+说明：
+1. 仅供娱乐，设计时不考虑平衡性。
+2. 游戏语言为非简体中文时，MOD 会显示为英文。
+
+使用：
+1. 解压 MOD 加载器至游戏目录（https://subsetgames.com/forum/viewtopic.php?f=26&p=117100）
+2. 将 MOD 解压至【mods】目录下（本文件路径应该为【%游戏目录%/mods/RndSquad/说明.txt】）
+3. 运行游戏
+4. 在【Configure Mods】中启用 MOD
+5. 在【Edit Squads】中启用真随机战队
+6. 如果无法生效，请重启游戏
+
+特别感谢：Lemonymous

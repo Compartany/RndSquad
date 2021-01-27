@@ -1,0 +1,204 @@
+local mod = {
+    id = "RndSquad",
+    name = "True Random Squad",
+    version = "0.1.0.20210127",
+    requirements = {"kf_ModUtils"},
+    modApiVersion = "2.5.4",
+    icon = "img/icon.png",
+    author = "Compartany"
+}
+print(mod.version) -- for package and release
+
+function mod:init()
+    -- 简化操作的全局变量，仅适用于临时传递
+    -- 某些状态需要退出游戏后固化到本地，可以存在 Mission 上
+    RND_GLOBAL = {
+        weaponNames = {"RndWeaponReroll", "RndWeaponPrime", "RndWeaponBrute", "RndWeaponRanged", "RndWeaponScience"}
+    }
+
+    self:initLibs()
+    self:initResources()
+    self:initScripts()
+    self:initOptions()
+end
+
+-- 改变设置、继续游戏都会重新加载
+function mod:load(options, version)
+    self.lib.modApiExt:load(self, options, version)
+    self.lib.shop:load(options)
+    self:loadScripts()
+    modApi:addSquad({RndMod_Texts.squad_pbr_name, "RndMechPrime", "RndMechBrute", "RndMechRanged"},
+        RndMod_Texts.squad_pbr_name, RndMod_Texts.squad_description, self.resourcePath .. "img/icon.png")
+    modApi:addSquad({RndMod_Texts.squad_prs_name, "RndMechPrime", "RndMechRanged", "RndMechScience"},
+        RndMod_Texts.squad_prs_name, RndMod_Texts.squad_description, self.resourcePath .. "img/icon.png")
+end
+
+function mod:loadScripts()
+    self.i18n:Load()
+    self.tool:Load()
+    self.mechs:Load()
+    self.weapons:Load()
+end
+
+function mod:initLibs()
+    rnd_modApiExt = require(self.scriptPath .. "modApiExt/modApiExt")
+    rnd_modApiExt:init()
+    self.lib = {}
+    self.lib.modApiExt = rnd_modApiExt
+    self.lib.palettes = require(self.scriptPath .. "libs/customPalettes")
+    self.lib.shop = require(self.scriptPath .. "libs/shop")
+end
+
+function mod:initScripts()
+    -- 加载的顺序很重要，不要乱调
+    self.i18n = require(self.scriptPath .. "i18n")
+    self.i18n:Init()
+    self.tool = require(self.scriptPath .. "tool")
+    self.mechs = require(self.scriptPath .. "mechs")
+    self.weapons = require(self.scriptPath .. "weapons")
+end
+
+function mod:initOptions()
+    local disabled = {
+        RndWeaponReroll = true
+    }
+    for _, weapon in ipairs(RND_GLOBAL.weaponNames) do
+        local name = RndWeapon_Texts[weapon .. "_Name"]
+        self.lib.shop:addWeapon({
+            id = weapon,
+            name = name,
+            desc = string.format(RndMod_Texts.add_to_shop, name),
+            default = disabled[weapon] and {
+                enabled = false
+            } or nil
+        })
+    end
+end
+
+function mod:initResources()
+    for _, weapon in ipairs(RND_GLOBAL.weaponNames) do
+        local wpImg = weapon .. ".png"
+        modApi:appendAsset("img/weapons/" .. wpImg, self.resourcePath .. "img/weapons/" .. wpImg)
+    end
+
+    self.lib.palettes.addPalette({
+        ID = "rndSquad_palette",
+        Name = "True Random Squad",
+        PlateHighlight = {228, 228, 228}, -- 高光   rgb(228, 228, 228)
+        PlateLight = {0, 0, 0}, -- 主色             rgb(0, 0, 0)
+        PlateMid = {0, 0, 0}, -- 主色阴影           rgb(0, 0, 0)
+        PlateDark = {0, 0, 0}, -- 主色暗部          rgb(0, 0, 0)
+        PlateOutline = {0, 0, 0}, -- 线条           rgb(0, 0, 0)
+        PlateShadow = {228, 228, 228}, -- 副色暗部  rgb(228, 228, 228)
+        BodyColor = {228, 228, 228}, -- 副色阴影    rgb(228, 228, 228)
+        BodyHighlight = {228, 228, 228} -- 副色     rgb(228, 228, 228)
+    })
+
+    require(self.scriptPath .. "libs/FURL")(mod, {{
+        Type = "mech",
+        Name = "RndMechPrime",
+        Filename = "RndMechPrime",
+        Path = "img/mechs/prime",
+        Default = {
+            PosX = -17,
+            PosY = -1
+        },
+        Animated = {
+            PosX = -16,
+            PosY = -1,
+            NumFrames = 4
+        },
+        Submerged = {
+            PosX = -17,
+            PosY = 8
+        },
+        Broken = {
+            PosX = -15,
+            PosY = -2
+        },
+        SubmergedBroken = {
+            PosX = -17,
+            PosY = 13
+        },
+        Icon = {}
+    }, {
+        Type = "mech",
+        Name = "RndMechBrute",
+        Filename = "RndMechBrute",
+        Path = "img/mechs/brute",
+        Default = {
+            PosX = -16,
+            PosY = 8
+        },
+        Animated = {
+            PosX = -16,
+            PosY = 8,
+            NumFrames = 3
+        },
+        Submerged = {
+            PosX = -16,
+            PosY = 12
+        },
+        Broken = {
+            PosX = -16,
+            PosY = 8
+        },
+        SubmergedBroken = {
+            PosX = -16,
+            PosY = 12
+        },
+        Icon = {}
+    }, {
+        Type = "mech",
+        Name = "RndMechRanged",
+        Filename = "RndMechRanged",
+        Path = "img/mechs/ranged",
+        Default = {
+            PosX = -17,
+            PosY = 0
+        },
+        Animated = {
+            PosX = -17,
+            PosY = 0,
+            NumFrames = 4
+        },
+        Submerged = {
+            PosX = -19,
+            PosY = 10
+        },
+        Broken = {
+            PosX = -17,
+            PosY = 0
+        },
+        SubmergedBroken = {
+            PosX = -19,
+            PosY = 13
+        },
+        Icon = {}
+    }, {
+        Type = "mech",
+        Name = "RndMechScience",
+        Filename = "RndMechScience",
+        Path = "img/mechs/science",
+        Default = {
+            PosX = -12,
+            PosY = -6
+        },
+        Animated = {
+            PosX = -12,
+            PosY = -9,
+            NumFrames = 4
+        },
+        Broken = {
+            PosX = -12,
+            PosY = -6
+        },
+        SubmergedBroken = {
+            PosX = -12,
+            PosY = -4
+        },
+        Icon = {}
+    }})
+end
+
+return mod
