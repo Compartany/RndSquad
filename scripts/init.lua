@@ -1,7 +1,7 @@
 local mod = {
     id = "RndSquad",
     name = "True Random Squad",
-    version = "0.1.0.20210127",
+    version = "0.2.0.20210127",
     requirements = {"kf_ModUtils"},
     modApiVersion = "2.5.4",
     icon = "img/icon.png",
@@ -31,6 +31,8 @@ function mod:load(options, version)
         RndMod_Texts.squad_pbr_name, RndMod_Texts.squad_description, self.resourcePath .. "img/icon.png")
     modApi:addSquad({RndMod_Texts.squad_prs_name, "RndMechPrime", "RndMechRanged", "RndMechScience"},
         RndMod_Texts.squad_prs_name, RndMod_Texts.squad_description, self.resourcePath .. "img/icon.png")
+    modApi:addSquad({RndMod_Texts.squad_pbs_name, "RndMechPrime", "RndMechBrute", "RndMechScience"},
+        RndMod_Texts.squad_pbs_name, RndMod_Texts.squad_description, self.resourcePath .. "img/icon.png")
 end
 
 function mod:loadScripts()
