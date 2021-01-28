@@ -3,10 +3,6 @@ local tool = mod.tool
 
 local this = {}
 
-function IsPassiveSkill()
-    return true
-end
-
 RndWeaponReroll = Skill:new{
     Icon = "weapons/RndWeaponReroll.png",
     PowerCost = 1,
