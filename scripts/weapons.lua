@@ -3,6 +3,10 @@ local tool = mod.tool
 
 local this = {}
 
+function IsPassiveSkill()
+    return true
+end
+
 RndWeaponReroll = Skill:new{
     Icon = "weapons/RndWeaponReroll.png",
     PowerCost = 1,
@@ -94,9 +98,7 @@ function RndWeaponReroll:GetSkillEffect_Inner(p1, p2)
                         pawn:SetSpace(Point(-1, -1))
                         modApi:conditionalHook(
                             function() return pawn:GetSpace() ~= origin end,
-                            function()
-                                pawn:SetSpace(origin)
-                            end
+                            function() pawn:SetSpace(origin) end
                         )
                     end
                 )
@@ -119,11 +121,7 @@ function RndWeaponReroll:GetSkillEffect_TipImage()
     ]])
     ret:AddDelay(1)
     ret:AddScript([[
-        local p1 = Point(2, 2)
-        local pawn = Board:GetPawn(p1)
-        pawn:SetActive(true)
-        Game:TriggerSound("/enemy/shared/robot_power_on")
-        Board:Ping(p1, GL_Color(255, 255, 255, 0))
+        Board:Ping(Point(2, 2), GL_Color(255, 255, 255, 0))
     ]])
     return ret
 end
@@ -131,6 +129,7 @@ end
 RndWeapon = Skill:new{
     Upgrade = "Z",
     IsRandomWeapon = true,
+    RndId = "RndWeapon", -- 子类必须修改为与 table 名一致
     TipImage = {
         Unit = Point(2, 3),
         Enemy = Point(2, 2),
@@ -165,9 +164,8 @@ function RndWeapon:GetSkillEffect_Inner(p1, p2)
     local table = self:GetWeaponTable()
     if table then
         local fx = table:GetSkillEffect(p1, p2)
-        fx:AddScript(string.format([[
-            RndWeapon:NextWeapon("%s")
-        ]], this:GetWeaponClass(self) or "nil"))
+        assert(self.RndId ~= "RndWeapon")
+        fx:AddScript(self.RndId .. ":NextWeapon()")
         self.LaunchSound = table.LaunchSound
         self.ImpactSound = table.ImpactSound
         return fx
@@ -184,7 +182,7 @@ function RndWeapon:GetSkillEffect_TipImage()
         local choices = {}
         local area = extract_table(table:GetTargetArea(p1))
         for _, space in ipairs(area) do
-            if space.y < 3 then
+            if space == p1 or (space.y < 3 and space.x > 1 and space.x < 5) then
                 choices[#choices + 1] = space
             end
         end
@@ -284,22 +282,28 @@ function RndWeapon:GetWeapon()
     return wp
 end
 
-function RndWeapon:NextWeapon(class)
-    class = class or this:GetWeaponClass(self)
+function RndWeapon:NextWeapon()
+    local class = this:GetWeaponClass(self)
+    local hasNext = false
     if not Board:IsTipImage() and class then
         local mission = GetCurrentMission()
         if mission and mission.RndWeapons and mission.RndWeapons[class] then
             local crWeapons = mission.RndWeapons[class]
-            if #crWeapons > 0 then
+            if #crWeapons > 1 then
                 table.remove(crWeapons, #crWeapons)
+                hasNext = true
             end
         end
+    end
+    if not hasNext then
+        self:InitWeapons(true)
     end
 end
 
 ----------------------------------------------------------
 
 RndWeaponPrime = RndWeapon:new{
+    RndId = "RndWeaponPrime",
     Class = "Prime",
     Icon = "weapons/RndWeaponPrime.png",
     PowerCost = 1,
@@ -317,6 +321,7 @@ RndWeaponPrime_AB = RndWeaponPrime:new{
 }
 
 RndWeaponBrute = RndWeapon:new{
+    RndId = "RndWeaponBrute",
     Class = "Brute",
     Icon = "weapons/RndWeaponBrute.png",
     PowerCost = 1,
@@ -334,6 +339,7 @@ RndWeaponBrute_AB = RndWeaponBrute:new{
 }
 
 RndWeaponRanged = RndWeapon:new{
+    RndId = "RndWeaponRanged",
     Class = "Ranged",
     Icon = "weapons/RndWeaponRanged.png",
     PowerCost = 1,
@@ -351,6 +357,7 @@ RndWeaponRanged_AB = RndWeaponRanged:new{
 }
 
 RndWeaponScience = RndWeapon:new{
+    RndId = "RndWeaponScience",
     Class = "Science",
     Icon = "weapons/RndWeaponScience.png",
     PowerCost = 1,
@@ -366,6 +373,43 @@ RndWeaponScience_B = RndWeaponScience:new{
 RndWeaponScience_AB = RndWeaponScience:new{
     Upgrade = "AB"
 }
+
+RndWeaponAny = RndWeapon:new{
+    RndId = "RndWeaponAny",
+    Icon = "weapons/RndWeaponAny.png",
+    PowerCost = 3,
+    Upgrades = 2,
+    UpgradeCost = {1, 2}
+}
+RndWeaponAny_A = RndWeaponAny:new{
+    Upgrade = "A"
+}
+RndWeaponAny_B = RndWeaponAny:new{
+    Upgrade = "B"
+}
+RndWeaponAny_AB = RndWeaponAny:new{
+    Upgrade = "AB"
+}
+
+RndWeaponTechnoVek = RndWeapon:new{
+    RndId = "RndWeaponTechnoVek",
+    Class = "TechnoVek",
+    Icon = "weapons/RndWeaponTechnoVek.png",
+    PowerCost = 1,
+    Upgrades = 2,
+    UpgradeCost = {1, 2}
+}
+RndWeaponTechnoVek_A = RndWeaponTechnoVek:new{
+    Upgrade = "A"
+}
+RndWeaponTechnoVek_B = RndWeaponTechnoVek:new{
+    Upgrade = "B"
+}
+RndWeaponTechnoVek_AB = RndWeaponTechnoVek:new{
+    Upgrade = "AB"
+}
+
+----------------------------------------------------------
 
 function this:GetWeaponClass(weapon)
     local class = nil
@@ -429,6 +473,11 @@ function this:Load()
             })
         end
     end
+    self.Weapons.TechnoVek = {
+        {id = "Vek_Beetle", name = self:GetWeaponKey("Vek_Beetle", "Name")},
+        {id = "Vek_Hornet", name = self:GetWeaponKey("Vek_Hornet", "Name")},
+        {id = "Vek_Scarab", name = self:GetWeaponKey("Vek_Scarab", "Name")}
+    }
 
     modApi:addNextTurnHook(function(mission)
         if not mission.RndWeapons_Init then

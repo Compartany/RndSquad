@@ -1,7 +1,7 @@
 local mod = {
     id = "RndSquad",
     name = "True Random Squad",
-    version = "0.2.0.20210127",
+    version = "0.3.0.20210128",
     requirements = {"kf_ModUtils"},
     modApiVersion = "2.5.4",
     icon = "img/icon.png",
@@ -13,7 +13,8 @@ function mod:init()
     -- 简化操作的全局变量，仅适用于临时传递
     -- 某些状态需要退出游戏后固化到本地，可以存在 Mission 上
     RND_GLOBAL = {
-        weaponNames = {"RndWeaponReroll", "RndWeaponPrime", "RndWeaponBrute", "RndWeaponRanged", "RndWeaponScience"}
+        weaponNames = {"RndWeaponReroll", "RndWeaponPrime", "RndWeaponBrute", "RndWeaponRanged", "RndWeaponScience",
+                       "RndWeaponAny", "RndWeaponTechnoVek"}
     }
 
     self:initLibs()
@@ -62,7 +63,8 @@ end
 
 function mod:initOptions()
     local disabled = {
-        RndWeaponReroll = true
+        RndWeaponReroll = true,
+        RndWeaponTechnoVek = true
     }
     for _, weapon in ipairs(RND_GLOBAL.weaponNames) do
         local name = RndWeapon_Texts[weapon .. "_Name"]
