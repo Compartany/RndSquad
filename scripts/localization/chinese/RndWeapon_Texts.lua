@@ -1,10 +1,10 @@
 return {
     RndWeaponReroll_Name = "重掷",
-    RndWeaponReroll_Description = "重掷骰子。（使用后可再次行动）",
-    RndWeaponReroll_Upgrade1 = "+1 使用次数",
-    RndWeaponReroll_Upgrade2 = "+2 使用次数",
-    RndWeaponReroll_A_UpgradeDescription = "每场战斗的使用次数加 1。",
-    RndWeaponReroll_B_UpgradeDescription = "每场战斗的使用次数加 2。",
+    RndWeaponReroll_Description = "在 3 条随机序列中切换。无使用次数限制，但每回合只能重复选择同一单位作为目标。机甲可在使用后再次行动。",
+    RndWeaponReroll_Upgrade1 = "+1 序列",
+    RndWeaponReroll_Upgrade2 = "+1 序列",
+    RndWeaponReroll_A_UpgradeDescription = "随机序列数加 1。",
+    RndWeaponReroll_B_UpgradeDescription = "随机序列数加 1。",
 
     RndWeaponPrime_Name = "RND[Prime]",
     RndWeaponPrime_Description = "使用随机主要类武器。",
@@ -29,17 +29,13 @@ return {
     
     RndWeaponScience_Name = "RND[Science]",
     RndWeaponScience_Description = "使用随机科学类武器。",
-    RndWeaponScience_Upgrade1 = "升级 1",
-    RndWeaponScience_Upgrade2 = "升级 2",
-    RndWeaponScience_A_UpgradeDescription = "随机科学类武器升级 1。",
-    RndWeaponScience_B_UpgradeDescription = "随机科学类武器升级 2。",
+    RndWeaponScience_Upgrade1 = "升级 1 & 2",
+    RndWeaponScience_A_UpgradeDescription = "随机科学类武器升级 1 和 升级 2。",
     
     RndWeaponAny_Name = "RND[Any]",
     RndWeaponAny_Description = "使用随机任何类武器。",
-    RndWeaponAny_Upgrade1 = "升级 1",
-    RndWeaponAny_Upgrade2 = "升级 2",
-    RndWeaponAny_A_UpgradeDescription = "随机任何类武器升级 1。",
-    RndWeaponAny_B_UpgradeDescription = "随机任何类武器升级 2。",
+    RndWeaponAny_Upgrade1 = "升级 1 & 2",
+    RndWeaponAny_A_UpgradeDescription = "随机任何类武器升级 1 和升级 2。",
 
     RndWeaponTechnoVek_Name = "RND[Cyborg]",
     RndWeaponTechnoVek_Description = "使用随机赛博格类武器。",

@@ -1,7 +1,7 @@
 local mod = {
     id = "RndSquad",
     name = "True Random Squad",
-    version = "0.3.1.20210128",
+    version = "0.4.0.20210129",
     requirements = {"kf_ModUtils"},
     modApiVersion = "2.5.4",
     icon = "img/icon.png",
@@ -12,7 +12,17 @@ print(mod.version) -- for package and release
 function mod:init()
     -- 简化操作的全局变量，仅适用于临时传递
     -- 某些状态需要退出游戏后固化到本地，可以存在 Mission 上
+    local profileKey = "MOD_RndSquad"
+    local data = modApi:readProfileData(profileKey)
+    if not data or not data.tip then
+        data = {
+            tip = {}
+        }
+        modApi:writeProfileData(profileKey, data)
+    end
     RND_GLOBAL = {
+        profileKey = profileKey,
+        data = data,
         weaponNames = {"RndWeaponReroll", "RndWeaponPrime", "RndWeaponBrute", "RndWeaponRanged", "RndWeaponScience",
                        "RndWeaponAny", "RndWeaponTechnoVek"}
     }
@@ -34,6 +44,12 @@ function mod:load(options, version)
         RndMod_Texts.squad_prs_name, RndMod_Texts.squad_description, self.resourcePath .. "img/icon.png")
     modApi:addSquad({RndMod_Texts.squad_pbs_name, "RndMechPrime", "RndMechBrute", "RndMechScience"},
         RndMod_Texts.squad_pbs_name, RndMod_Texts.squad_description, self.resourcePath .. "img/icon.png")
+
+    if options.opt_resetTips.enabled then
+        RND_GLOBAL.data.tip = {}
+        modApi:writeProfileData(RND_GLOBAL.profileKey, RND_GLOBAL.data)
+        options.opt_resetTips.enabled = false
+    end
 end
 
 function mod:loadScripts()
@@ -59,6 +75,7 @@ function mod:initScripts()
     self.tool = require(self.scriptPath .. "tool")
     self.mechs = require(self.scriptPath .. "mechs")
     self.weapons = require(self.scriptPath .. "weapons")
+    self.weapons:Init()
 end
 
 function mod:initOptions()
@@ -71,12 +88,16 @@ function mod:initOptions()
         self.lib.shop:addWeapon({
             id = weapon,
             name = name,
-            desc = string.format(RndMod_Texts.add_to_shop, name),
+            desc = string.format(RndMod_Texts.addToShop, name),
             default = disabled[weapon] and {
                 enabled = false
             } or nil
         })
     end
+
+    modApi:addGenerationOption("opt_resetTips", RndMod_Texts.resetTips_title, RndMod_Texts.resetTips_text, {
+        enabled = false
+    })
 end
 
 function mod:initResources()

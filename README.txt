@@ -17,7 +17,7 @@ These Mechs have mastered the laws of randomness, and they can always find the m
 Notes:
 1. Just for fun, designed without consideration of game balance.
 2. You can enable [RND[Cyborg]] in MOD settings to add the random weapon of Cyborg class to shop. (Game restart required)
-3. Random weapons will use all weapons in the game including MOD weapons. You can disable weapons you don't want to randomize by [Mod Content/Select Weapon Deck].
+3. Random weapons will use all weapons in the game including MOD weapons. You can disable weapons you don't want to randomize by [Mod Content/Select Weapon Deck]. (Game restart required)
 4. When the game language is not simplified Chinese, the MOD will be displayed in English. 
 5. I'm not a native English speaker, and all translations were done with the help of DeepL Translate, so the English text in MOD must be very terrible. If you are interested in helping to optimize the translation, please contact me at Discord or 2994359861@qq.com.
 

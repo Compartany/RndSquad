@@ -1,14 +1,16 @@
 local mod = mod_loader.mods[modApi.currentMod]
-local tool = mod.tool
+local baseRandomSequenceNum = 3
 
-local this = {}
+local this = {
+    HintTextOrigins = {}
+}
 
 RndWeaponReroll = Skill:new{
     Icon = "weapons/RndWeaponReroll.png",
     PowerCost = 1,
     Upgrades = 2,
-    UpgradeCost = {1, 3},
-    Limited = 2,
+    UpgradeCost = {1, 1},
+    RandomSequenceNum = baseRandomSequenceNum,
     LaunchSound = "/weapons/swap",
     TipImage = {
         Unit = Point(2, 2),
@@ -18,13 +20,13 @@ RndWeaponReroll = Skill:new{
     }
 }
 RndWeaponReroll_A = RndWeaponReroll:new{
-    Limited = 3
+    RandomSequenceNum = baseRandomSequenceNum + 1
 }
 RndWeaponReroll_B = RndWeaponReroll:new{
-    Limited = 4
+    RandomSequenceNum = baseRandomSequenceNum + 1
 }
 RndWeaponReroll_AB = RndWeaponReroll:new{
-    Limited = 5
+    RandomSequenceNum = baseRandomSequenceNum + 2
 }
 
 function RndWeaponReroll:GetTargetArea(point)
@@ -32,15 +34,28 @@ function RndWeaponReroll:GetTargetArea(point)
     if Board:IsTipImage() then
         ret:push_back(Point(1, 2))
     else
-        local pawns = extract_table(Board:GetPawns(TEAM_MECH))
-        for _, id in ipairs(pawns) do
-            local pawn = Board:GetPawn(id)
+        local mission = GetCurrentMission()
+        if mission and mission.RndWeaponReroll_Target then
+            local pawn = Board:GetPawn(mission.RndWeaponReroll_Target)
             if pawn and pawn:IsActive() then
-                local weaponIds = rnd_modApiExt.pawn:getWeapons(id)
-                for _, weaponId in ipairs(weaponIds) do
-                    local weapon = _G[weaponId]
-                    if weapon and weapon.IsRandomWeapon then
-                        ret:push_back(pawn:GetSpace())
+                local boardSize = Board:GetSize()
+                for x = 0, boardSize.x - 1 do
+                    for y = 0, boardSize.y - 1 do
+                        ret:push_back(Point(x, y))
+                    end
+                end
+            end
+        else
+            local pawns = extract_table(Board:GetPawns(TEAM_MECH))
+            for _, id in ipairs(pawns) do
+                local pawn = Board:GetPawn(id)
+                if pawn and pawn:IsActive() then
+                    local weaponIds = rnd_modApiExt.pawn:getWeapons(id)
+                    for _, weaponId in ipairs(weaponIds) do
+                        local weapon = _G[weaponId]
+                        if weapon and weapon.IsRandomWeapon then
+                            ret:push_back(pawn:GetSpace())
+                        end
                     end
                 end
             end
@@ -55,14 +70,26 @@ end
 
 function RndWeaponReroll:GetSkillEffect_Inner(p1, p2)
     local ret = SkillEffect()
-    local target = Board:GetPawn(p2)
+    local target = nil
+    local mission = GetCurrentMission()
+    if mission and mission.RndWeaponReroll_Target then
+        target = Board:GetPawn(mission.RndWeaponReroll_Target)
+        p2 = target:GetSpace()
+    else
+        target = Board:GetPawn(p2)
+    end
     if target then
         ret:AddScript(string.format([[
-            local weaponIds = rnd_modApiExt.pawn:getWeapons(%d)
+            local id = %d
+            local mission = GetCurrentMission()
+            if mission then
+                mission.RndWeaponReroll_Target = id
+            end
+            local weaponIds = rnd_modApiExt.pawn:getWeapons(id)
             for _, weaponId in ipairs(weaponIds) do
                 local weapon = _G[weaponId]
                 if weapon and weapon.IsRandomWeapon then
-                    weapon:NextWeapon()
+                    weapon:SwitchRandomSequence()
                 end
             end
         ]], target:GetId()))
@@ -70,35 +97,15 @@ function RndWeaponReroll:GetSkillEffect_Inner(p1, p2)
             local pawn = Board:GetPawn(%d)
             if pawn then
                 local Weapons = mod_loader.mods.RndSquad.weapons
-                local text = Weapons:GetPawnWeaponName(pawn)
-                if text then
-                    local p2 = %s
-                    Board:Ping(p2, GL_Color(255, 255, 255, 0))
-                    Board:AddAlert(p2, text)
-                end
+                local p2 = %s
+                local text = Weapons:GetPawnWeaponName(pawn) -- 不要验证 text 是否为空
+                Board:Ping(p2, GL_Color(255, 255, 255, 0))
+                Weapons:SetHintText(pawn, text)
             end
         ]], target:GetId(), p2:GetString()))
         ret:AddDelay(0.2)
-
-        -- special thanks to Lemonymous for the code below
         ret:AddScript(string.format([[
-            local pawn = Board:GetPawn(%d)
-            if pawn then
-                modApi:conditionalHook(
-                    function() return not Board:IsBusy() end,
-                    function()
-                        local origin = pawn:GetSpace()
-                        pawn:SetActive(true)
-                        Game:TriggerSound("/enemy/shared/robot_power_on")
-                        Board:Ping(origin, GL_Color(255, 255, 255, 0))
-                        pawn:SetSpace(Point(-1, -1))
-                        modApi:conditionalHook(
-                            function() return pawn:GetSpace() ~= origin end,
-                            function() pawn:SetSpace(origin) end
-                        )
-                    end
-                )
-            end
+            Board:GetPawn(%d):SetActive(true)
         ]], Pawn:GetId()))
     end
     return ret
@@ -106,19 +113,33 @@ end
 
 function RndWeaponReroll:GetSkillEffect_TipImage()
     local ret = SkillEffect()
-    ret:AddScript([[
-        local p2 = Point(1, 2)
-        local pawn = Board:GetPawn(p2)
-        local class = _G[pawn:GetType()].Class
-        local Weapons = mod_loader.mods.RndSquad.weapons
-        local text = random_element(Weapons.Weapons[class]).name
-        Board:Ping(p2, GL_Color(255, 255, 255, 0))
-        Board:AddAlert(p2, text)
-    ]])
-    ret:AddDelay(1)
-    ret:AddScript([[
-        Board:Ping(Point(2, 2), GL_Color(255, 255, 255, 0))
-    ]])
+    local p2 = Point(1, 2)
+    local pawn = Board:GetPawn(p2)
+    local globalKey = "RndWeaponReroll_TipImageWeapons" .. self.RandomSequenceNum
+    if pawn then
+        if not RND_GLOBAL[globalKey] then
+            local weapons = {}
+            local class = _G[pawn:GetType()].Class
+            if #this.Weapons[class] > 0 then
+                for i = 1, self.RandomSequenceNum do
+                    local id = random_element(this.Weapons[class])
+                    weapons[#weapons + 1] = this:GetWeaponKey(id, "Name")
+                end
+            end
+            RND_GLOBAL[globalKey] = weapons
+            RND_GLOBAL[globalKey .. "_Index"] = 1
+        end
+        ret:AddScript(string.format([=[
+            local p2 = %s
+            local globalKey = "%s"
+            local indexKey = globalKey .. "_Index"
+            local weapons = RND_GLOBAL[globalKey]
+            local weapon = weapons[RND_GLOBAL[indexKey]]
+            RND_GLOBAL[indexKey] = RND_GLOBAL[indexKey] %% #weapons + 1
+            Board:Ping(p2, GL_Color(255, 255, 255, 0))
+            Board:AddAlert(p2, weapon)
+        ]=], p2:GetString(), globalKey))
+    end
     return ret
 end
 
@@ -162,6 +183,19 @@ function RndWeapon:GetSkillEffect_Inner(p1, p2)
         local fx = table:GetSkillEffect(p1, p2)
         assert(self.RndId ~= "RndWeapon")
         fx:AddScript(self.RndId .. ":NextWeapon()")
+        fx:AddScript(string.format([[
+            modApi:conditionalHook(
+                function() return not Board:IsBusy() end,
+                function()
+                    local pawn = Board:GetPawn(%d)
+                    if pawn then
+                        local Weapons = mod_loader.mods.RndSquad.weapons
+                        local text = pawn:IsActive() and Weapons:GetPawnWeaponName(pawn) or nil
+                        Weapons:SetHintText(pawn, text)
+                    end
+                end
+            )
+        ]], Pawn:GetId()))
         self.LaunchSound = table.LaunchSound
         self.ImpactSound = table.ImpactSound
         return fx
@@ -178,7 +212,7 @@ function RndWeapon:GetSkillEffect_TipImage()
         local choices = {}
         local area = extract_table(table:GetTargetArea(p1))
         for _, space in ipairs(area) do
-            if space == p1 or (space.y < 3 and space.x > 1 and space.x < 5) then
+            if space == p1 or (space.y < 3 and space.x > 1 and space.x < 4) then
                 choices[#choices + 1] = space
             end
         end
@@ -193,37 +227,45 @@ end
 function RndWeapon:InitWeapons(reset)
     local class = this:GetWeaponClass(self)
     local mission = GetCurrentMission()
-    if not reset and (mission.RndWeapons and mission.RndWeapons[class] and #mission.RndWeapons[class] > 0) then
+    if not reset and
+        (mission.RndWeapons and mission.RndWeapons[class] and mission.RndWeapons[class][1] and
+            #mission.RndWeapons[class][1] > 0) then
         return
     end
     if not mission.RndWeapons then
         mission.RndWeapons = {}
     end
     if class then
-        local rnds = {}
-        if this.Weapons and mission then
-            local cWeapons = this.Weapons[class]
-            if cWeapons and #cWeapons > 0 then
-                local orders = {}
-                for i = 1, #cWeapons do
-                    orders[i] = i
-                end
-                while #orders > 0 do
-                    rnds[#rnds + 1] = cWeapons[random_removal(orders)]
+        mission.RndWeapons[class] = {
+            SequenceIndex = 1,
+            WeaponIndex = 1
+        }
+        for i = 1, mission.RandomSequenceNum do
+            local rnds = {}
+            if this.Weapons and mission then
+                local cWeapons = this.Weapons[class]
+                if cWeapons and #cWeapons > 0 then
+                    local orders = {}
+                    for j = 1, #cWeapons do
+                        orders[j] = j
+                    end
+                    while #orders > 0 do
+                        rnds[#rnds + 1] = cWeapons[random_removal(orders)]
+                    end
                 end
             end
+            mission.RndWeapons[class][i] = rnds
         end
-        mission.RndWeapons[class] = rnds
     end
 end
 
 function RndWeapon:GetWeaponTable()
     local table = nil
     local wp = self:GetWeapon()
-    if wp and wp.id then
+    if wp then
         local upgrade = self.Upgrade or "Z"
         if upgrade == "AB" then
-            local id = wp.id .. "_AB"
+            local id = wp .. "_AB"
             if this:IsValidWeapon(_G[id]) then
                 table = _G[id]
             else
@@ -231,7 +273,7 @@ function RndWeapon:GetWeaponTable()
             end
         end
         if upgrade == "B" then
-            local id = wp.id .. "_B"
+            local id = wp .. "_B"
             if this:IsValidWeapon(_G[id]) then
                 table = _G[id]
             else
@@ -239,7 +281,7 @@ function RndWeapon:GetWeaponTable()
             end
         end
         if upgrade == "A" then
-            local id = wp.id .. "_A"
+            local id = wp .. "_A"
             if this:IsValidWeapon(_G[id]) then
                 table = _G[id]
             else
@@ -247,7 +289,7 @@ function RndWeapon:GetWeaponTable()
             end
         end
         if upgrade == "Z" then
-            table = _G[wp.id]
+            table = _G[wp]
         end
     end
     return table
@@ -264,12 +306,10 @@ function RndWeapon:GetWeapon()
             else
                 local mission = GetCurrentMission()
                 if mission then
-                    if not mission.RndWeapons or not mission.RndWeapons[class] or #mission.RndWeapons[class] == 0 then
-                        self:InitWeapons()
-                    end
-                    local crWeapons = mission.RndWeapons[class]
-                    if #crWeapons > 0 then
-                        wp = crWeapons[#crWeapons]
+                    local crWeaponsAll = mission.RndWeapons[class]
+                    local crWeapons = crWeaponsAll[crWeaponsAll.SequenceIndex]
+                    if crWeapons and #crWeapons > 0 then
+                        wp = crWeapons[crWeaponsAll.WeaponIndex]
                     end
                 end
             end
@@ -280,19 +320,28 @@ end
 
 function RndWeapon:NextWeapon()
     local class = this:GetWeaponClass(self)
-    local hasNext = false
     if not Board:IsTipImage() and class then
         local mission = GetCurrentMission()
         if mission and mission.RndWeapons and mission.RndWeapons[class] then
-            local crWeapons = mission.RndWeapons[class]
-            if #crWeapons > 1 then
-                table.remove(crWeapons, #crWeapons)
-                hasNext = true
+            local crWeaponsAll = mission.RndWeapons[class]
+            local crWeapons1 = crWeaponsAll[1]
+            if crWeapons1 and #crWeapons1 > 1 then -- 只有一件也不用切换了
+                crWeaponsAll.WeaponIndex = crWeaponsAll.WeaponIndex % #crWeapons1 + 1
             end
         end
     end
-    if not hasNext then
-        self:InitWeapons(true)
+end
+
+function RndWeapon:SwitchRandomSequence()
+    local class = this:GetWeaponClass(self)
+    if not Board:IsTipImage() and class then
+        local mission = GetCurrentMission()
+        if mission and mission.RndWeapons and mission.RndWeapons[class] then
+            local crWeaponsAll = mission.RndWeapons[class]
+            if #crWeaponsAll > 1 then -- 只有一条线就不用切换了
+                crWeaponsAll.SequenceIndex = crWeaponsAll.SequenceIndex % #crWeaponsAll + 1
+            end
+        end
     end
 end
 
@@ -304,7 +353,7 @@ RndWeaponPrime = RndWeapon:new{
     Icon = "weapons/RndWeaponPrime.png",
     PowerCost = 1,
     Upgrades = 2,
-    UpgradeCost = {1, 2}
+    UpgradeCost = {1, 3}
 }
 RndWeaponPrime_A = RndWeaponPrime:new{
     Upgrade = "A"
@@ -340,7 +389,7 @@ RndWeaponRanged = RndWeapon:new{
     Icon = "weapons/RndWeaponRanged.png",
     PowerCost = 1,
     Upgrades = 2,
-    UpgradeCost = {1, 2}
+    UpgradeCost = {1, 1}
 }
 RndWeaponRanged_A = RndWeaponRanged:new{
     Upgrade = "A"
@@ -357,33 +406,31 @@ RndWeaponScience = RndWeapon:new{
     Class = "Science",
     Icon = "weapons/RndWeaponScience.png",
     PowerCost = 1,
-    Upgrades = 2,
-    UpgradeCost = {1, 2}
+    Upgrades = 1,
+    UpgradeCost = {1}
 }
 RndWeaponScience_A = RndWeaponScience:new{
-    Upgrade = "A"
-}
-RndWeaponScience_B = RndWeaponScience:new{
-    Upgrade = "B"
-}
-RndWeaponScience_AB = RndWeaponScience:new{
     Upgrade = "AB"
 }
 
 RndWeaponAny = RndWeapon:new{
     RndId = "RndWeaponAny",
     Icon = "weapons/RndWeaponAny.png",
-    PowerCost = 3,
-    Upgrades = 2,
-    UpgradeCost = {1, 2}
+    PowerCost = 1,
+    Upgrades = 1,
+    UpgradeCost = {1},
+    TipImage = {
+        Unit = Point(2, 3),
+        Enemy = Point(2, 2),
+        Enemy2 = Point(3, 2),
+        Enemy3 = Point(1, 1),
+        Friendly = Point(3, 1),
+        Mountain = Point(2, 1),
+        Target = Point(2, 2),
+        CustomPawn = "RndMechPrime"
+    }
 }
 RndWeaponAny_A = RndWeaponAny:new{
-    Upgrade = "A"
-}
-RndWeaponAny_B = RndWeaponAny:new{
-    Upgrade = "B"
-}
-RndWeaponAny_AB = RndWeaponAny:new{
     Upgrade = "AB"
 }
 
@@ -393,7 +440,17 @@ RndWeaponTechnoVek = RndWeapon:new{
     Icon = "weapons/RndWeaponTechnoVek.png",
     PowerCost = 1,
     Upgrades = 2,
-    UpgradeCost = {1, 2}
+    UpgradeCost = {1, 3},
+    TipImage = {
+        Unit = Point(2, 3),
+        Enemy = Point(2, 2),
+        Enemy2 = Point(3, 2),
+        Enemy3 = Point(1, 1),
+        Friendly = Point(3, 1),
+        Mountain = Point(2, 1),
+        Target = Point(2, 2),
+        CustomPawn = "HornetMech"
+    }
 }
 RndWeaponTechnoVek_A = RndWeaponTechnoVek:new{
     Upgrade = "A"
@@ -440,18 +497,87 @@ function this:GetPawnWeaponName(pawn)
         for _, weaponId in ipairs(weaponIds) do
             local weapon = _G[weaponId]
             if weapon and weapon.IsRandomWeapon then
-                local entry = weapon:GetWeapon()
-                if entry then
+                local id = weapon:GetWeapon()
+                if id then
                     if text then
-                        text = text .. " & " .. entry.name
+                        text = text .. " & " .. self:GetWeaponKey(id, "Name")
                     else
-                        text = entry.name
+                        text = self:GetWeaponKey(id, "Name")
                     end
                 end
             end
         end
     end
     return text
+end
+
+function this:SetHintText(pawn, text)
+    if pawn then
+        local type = pawn:GetType()
+        if text and text ~= "" then
+            modApi:setText(type, Rnd_Texts[type] .. " - " .. text)
+            self.HintTextOrigins[type] = Rnd_Texts[type]
+            if not RND_GLOBAL.data.tip.HintText then
+                Game:AddTip("HintTextTip", pawn:GetSpace())
+                RND_GLOBAL.data.tip.HintText = true
+                modApi:writeProfileData(RND_GLOBAL.profileKey, RND_GLOBAL.data)
+            end
+        else
+            modApi:setText(type, Rnd_Texts[type])
+        end
+    end
+end
+
+function this:InitHintText(checkActive)
+    local pawns = extract_table(Board:GetPawns(TEAM_MECH))
+    for _, id in ipairs(pawns) do
+        local pawn = Board:GetPawn(id)
+        if pawn and (not checkActive or pawn:IsActive()) then
+            local text = self:GetPawnWeaponName(pawn)
+            if text then
+                self:SetHintText(pawn, text)
+            end
+        end
+    end
+end
+
+function this:ResetHintText()
+    if self.HintTextOrigins then
+        for type, origin in pairs(self.HintTextOrigins) do
+            modApi:setText(type, self.HintTextOrigins[type] or Rnd_Texts[type])
+            self.HintTextOrigins[type] = nil
+        end
+    end
+end
+
+function this:InitRndWeapons(mission)
+    mission.RndWeaponReroll_Target = nil
+    mission.RandomSequenceNum = baseRandomSequenceNum
+    local randomWeapons = {}
+    local pawns = extract_table(Board:GetPawns(TEAM_MECH))
+    for _, id in ipairs(pawns) do
+        local weaponIds = rnd_modApiExt.pawn:getWeapons(id)
+        for _, weaponId in ipairs(weaponIds) do
+            local weapon = _G[weaponId]
+            if weapon then
+                if weapon.IsRandomWeapon then
+                    randomWeapons[#randomWeapons + 1] = weapon
+                elseif weapon.RandomSequenceNum then
+                    mission.RandomSequenceNum = mission.RandomSequenceNum + weapon.RandomSequenceNum -
+                                                    baseRandomSequenceNum
+                end
+            end
+        end
+    end
+    for _, randomWeapon in ipairs(randomWeapons) do
+        randomWeapon:InitWeapons(true)
+    end
+end
+
+function this:Init()
+    sdlext.addMainMenuEnteredHook(function(screen, wasHangar, wasGame)
+        self:ResetHintText()
+    end)
 end
 
 function this:Load()
@@ -463,45 +589,41 @@ function this:Load()
             if not self.Weapons[class] then
                 self.Weapons[class] = {}
             end
-            table.insert(self.Weapons[class], {
-                id = id,
-                name = self:GetWeaponKey(id, "Name")
-            })
+            table.insert(self.Weapons[class], id)
         end
     end
-    self.Weapons.TechnoVek = {
-        {id = "Vek_Beetle", name = self:GetWeaponKey("Vek_Beetle", "Name")},
-        {id = "Vek_Hornet", name = self:GetWeaponKey("Vek_Hornet", "Name")},
-        {id = "Vek_Scarab", name = self:GetWeaponKey("Vek_Scarab", "Name")}
-    }
+    self.Weapons.TechnoVek = {"Vek_Beetle", "Vek_Hornet", "Vek_Scarab"}
 
     modApi:addNextTurnHook(function(mission)
         if not mission.RndWeapons_Init then
-            local pawns = extract_table(Board:GetPawns(TEAM_MECH))
-            for _, id in ipairs(pawns) do
-                local weaponIds = rnd_modApiExt.pawn:getWeapons(id)
-                for _, weaponId in ipairs(weaponIds) do
-                    local weapon = _G[weaponId]
-                    if weapon and weapon.IsRandomWeapon then
-                        weapon:InitWeapons()
-                    end
-                end
-                mission.RndWeapons_Init = true
-            end
+            self:InitRndWeapons(mission)
+            mission.RndWeapons_Init = true
         end
 
         if Game:GetTeamTurn() == TEAM_PLAYER then
-            local pawns = extract_table(Board:GetPawns(TEAM_MECH))
-            for _, id in ipairs(pawns) do
-                local pawn = Board:GetPawn(id)
-                if pawn then
-                    local text = self:GetPawnWeaponName(pawn)
-                    if text then
-                        Board:AddAlert(pawn:GetSpace(), text)
-                    end
-                end
-            end
+            mission.RndWeaponReroll_Target = nil
+            self:InitHintText()
         end
+    end)
+    modApi:addPostLoadGameHook(function()
+        modApi:runLater(function(mission)
+            if mission.RndWeapons_Init then
+                self:InitHintText(true)
+            end
+        end)
+    end)
+    modApi:addMissionEndHook(function(mission)
+        self:ResetHintText()
+    end)
+
+    modApi:addTestMechEnteredHook(function(mission)
+        modApi:runLater(function(mission)
+            self:InitRndWeapons(mission)
+            self:InitHintText()
+        end)
+    end)
+    modApi:addTestMechExitedHook(function(mission)
+        self:ResetHintText()
     end)
 end
 
