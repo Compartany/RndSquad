@@ -1,8 +1,10 @@
 local mod = mod_loader.mods[modApi.currentMod]
+local tool = mod.tool
 local baseRandomSequenceNum = 3
 
 local this = {
-    HintTextOrigins = {}
+    HintPawnTypes = {},
+    PawnNames = {}
 }
 
 RndWeaponReroll = Skill:new{
@@ -105,7 +107,11 @@ function RndWeaponReroll:GetSkillEffect_Inner(p1, p2)
         ]], target:GetId(), p2:GetString()))
         ret:AddDelay(0.2)
         ret:AddScript(string.format([[
-            Board:GetPawn(%d):SetActive(true)
+            local pawn = Board:GetPawn(%d)
+            if pawn then
+                pawn:SetActive(true)
+                pawn:SetRndReactivated(true)
+            end
         ]], Pawn:GetId()))
     end
     return ret
@@ -185,7 +191,9 @@ function RndWeapon:GetSkillEffect_Inner(p1, p2)
         fx:AddScript(self.RndId .. ":NextWeapon()")
         fx:AddScript(string.format([[
             modApi:conditionalHook(
-                function() return not Board:IsBusy() end,
+                function()
+                    return Board and not Board:IsBusy()
+                end,
                 function()
                     local pawn = Board:GetPawn(%d)
                     if pawn then
@@ -514,16 +522,21 @@ end
 function this:SetHintText(pawn, text)
     if pawn then
         local type = pawn:GetType()
+        local name = self.PawnNames[type]
         if text and text ~= "" then
-            modApi:setText(type, Rnd_Texts[type] .. " - " .. text)
-            self.HintTextOrigins[type] = Rnd_Texts[type]
+            if not name then
+                name = GetText(type)
+                self.PawnNames[type] = name
+            end
+            self.HintPawnTypes[type] = true -- 必须以 type 为 key
+            modApi:setText(type, name .. " - " .. text)
             if not RND_GLOBAL.data.tip.HintText then
                 Game:AddTip("HintTextTip", pawn:GetSpace())
                 RND_GLOBAL.data.tip.HintText = true
                 modApi:writeProfileData(RND_GLOBAL.profileKey, RND_GLOBAL.data)
             end
-        else
-            modApi:setText(type, Rnd_Texts[type])
+        elseif name then
+            modApi:setText(type, name)
         end
     end
 end
@@ -542,10 +555,12 @@ function this:InitHintText(checkActive)
 end
 
 function this:ResetHintText()
-    if self.HintTextOrigins then
-        for type, origin in pairs(self.HintTextOrigins) do
-            modApi:setText(type, self.HintTextOrigins[type] or Rnd_Texts[type])
-            self.HintTextOrigins[type] = nil
+    if self.HintPawnTypes then
+        for type, hint in pairs(self.HintPawnTypes) do
+            if hint and self.PawnNames[type] then
+                modApi:setText(type, self.PawnNames[type])
+                self.HintPawnTypes[type] = nil
+            end
         end
     end
 end
@@ -626,6 +641,25 @@ function this:Load()
     end)
     modApi:addTestMechExitedHook(function(mission)
         self:ResetHintText()
+    end)
+
+    -- disable Post_Move temporarily
+    local moveBonuses = {}
+    rnd_modApiExt:addSkillStartHook(function(mission, pawn, weaponId, p1, p2)
+        local reroll = tool:ExtractWeapon(weaponId) == "RndWeaponReroll"
+        if reroll and Pawn:IsAbility("Post_Move") then
+            local speed = pawn:GetMoveSpeed()
+            pawn:SetMoveSpeed(0)
+            moveBonuses[pawn:GetId()] = pawn:GetMoveSpeed()
+            pawn:SetMoveSpeed(speed)
+            pawn:AddMoveBonus(-25)
+        end
+    end)
+    rnd_modApiExt:addSkillEndHook(function(mission, pawn, weaponId, p1, p2)
+        local reroll = tool:ExtractWeapon(weaponId) == "RndWeaponReroll"
+        if reroll and Pawn:IsAbility("Post_Move") then
+            pawn:AddMoveBonus(moveBonuses[pawn:GetId()])
+        end
     end)
 end
 

@@ -1,7 +1,7 @@
 local mod = {
     id = "RndSquad",
     name = "True Random Squad",
-    version = "0.4.1.20210129",
+    version = "0.5.0.20210130",
     requirements = {"kf_ModUtils"},
     modApiVersion = "2.5.4",
     icon = "img/icon.png",
@@ -55,6 +55,7 @@ end
 function mod:loadScripts()
     self.i18n:Load()
     self.tool:Load()
+    self.pawns:Load()
     self.mechs:Load()
     self.weapons:Load()
 end
@@ -73,6 +74,7 @@ function mod:initScripts()
     self.i18n = require(self.scriptPath .. "i18n")
     self.i18n:Init()
     self.tool = require(self.scriptPath .. "tool")
+    self.pawns = require(self.scriptPath .. "pawns")
     self.mechs = require(self.scriptPath .. "mechs")
     self.weapons = require(self.scriptPath .. "weapons")
     self.weapons:Init()
@@ -119,6 +121,7 @@ function mod:initResources()
         BodyHighlight = {228, 228, 228} -- 副色     rgb(228, 228, 228)
     })
 
+    local baseMechAnimTime = 1.2 -- 时间要错开，不然贼僵硬
     require(self.scriptPath .. "libs/FURL")(mod, {{
         Type = "mech",
         Name = "RndMechPrime",
@@ -129,9 +132,10 @@ function mod:initResources()
             PosY = -1
         },
         Animated = {
-            PosX = -16,
-            PosY = -1,
-            NumFrames = 4
+            PosX = -21,
+            PosY = -9,
+            NumFrames = 7,
+            Time = baseMechAnimTime - 0.1
         },
         Submerged = {
             PosX = -17,
@@ -156,9 +160,10 @@ function mod:initResources()
             PosY = 8
         },
         Animated = {
-            PosX = -16,
-            PosY = 8,
-            NumFrames = 3
+            PosX = -19,
+            PosY = 0,
+            NumFrames = 6,
+            Time = baseMechAnimTime + 0
         },
         Submerged = {
             PosX = -16,
@@ -183,9 +188,10 @@ function mod:initResources()
             PosY = 0
         },
         Animated = {
-            PosX = -17,
-            PosY = 0,
-            NumFrames = 4
+            PosX = -18,
+            PosY = -4,
+            NumFrames = 6,
+            Time = baseMechAnimTime + 0.1
         },
         Submerged = {
             PosX = -19,
@@ -210,9 +216,10 @@ function mod:initResources()
             PosY = -6
         },
         Animated = {
-            PosX = -12,
-            PosY = -9,
-            NumFrames = 4
+            PosX = -24,
+            PosY = -4,
+            NumFrames = 5,
+            Time = baseMechAnimTime + 0.2
         },
         Broken = {
             PosX = -12,
