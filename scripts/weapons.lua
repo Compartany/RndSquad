@@ -107,11 +107,7 @@ function RndWeaponReroll:GetSkillEffect_Inner(p1, p2)
         ]], target:GetId(), p2:GetString()))
         ret:AddDelay(0.2)
         ret:AddScript(string.format([[
-            local pawn = Board:GetPawn(%d)
-            if pawn then
-                pawn:SetActive(true)
-                pawn:SetRndReactivated(true)
-            end
+            Board:GetPawn(%d):SetActive(true)
         ]], Pawn:GetId()))
     end
     return ret
@@ -661,13 +657,18 @@ function this:Load()
     -- disable Post_Move temporarily
     local moveBonuses = {}
     rnd_modApiExt:addSkillStartHook(function(mission, pawn, weaponId, p1, p2)
-        local reroll = tool:ExtractWeapon(weaponId) == "RndWeaponReroll"
-        if reroll and Pawn:IsAbility("Post_Move") then
-            local speed = pawn:GetMoveSpeed()
-            pawn:SetMoveSpeed(0)
-            moveBonuses[pawn:GetId()] = pawn:GetMoveSpeed()
-            pawn:SetMoveSpeed(speed)
-            pawn:AddMoveBonus(-25)
+        local wpName = tool:ExtractWeapon(weaponId)
+        if wpName == "RndWeaponReroll" then
+            if pawn:IsAbility("Post_Move") then
+                local speed = pawn:GetMoveSpeed()
+                pawn:SetMoveSpeed(0)
+                moveBonuses[pawn:GetId()] = pawn:GetMoveSpeed()
+                pawn:SetMoveSpeed(speed)
+                pawn:AddMoveBonus(-25)
+            end
+            pawn:SetRndReactivated(true)
+        elseif weaponId ~= "Move" and pawn:IsRndReactivated() then
+            pawn:SetRndReactivated(false)
         end
     end)
     rnd_modApiExt:addSkillEndHook(function(mission, pawn, weaponId, p1, p2)

@@ -33,11 +33,7 @@ function Move:GetSkillEffect(p1, p2, ...)
     if Pawn:IsRndReactivated() and (Pawn:IsAbility("Shifty") or Pawn:IsAbility("Post_Move")) then
         ret:AddDelay(0.2)
         ret:AddScript(string.format([[
-            local pawn = Board:GetPawn(%d)
-            if pawn then
-                pawn:SetActive(true)
-                pawn:SetRndReactivated(false)
-            end
+            Board:GetPawn(%d):SetActive(true)
         ]], Pawn:GetId()))
     end
     return ret
