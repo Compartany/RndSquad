@@ -596,18 +596,22 @@ function this:Init()
 end
 
 function this:Load()
-    self.Weapons = {}
-    for id, enabled in pairs(modApi.weaponDeck) do
-        local weapon = _G[id]
-        if enabled and self:IsValidWeapon(weapon) then
-            local class = self:GetWeaponClass(weapon)
-            if not self.Weapons[class] then
-                self.Weapons[class] = {}
+    self.Weapons = {
+        TechnoVek = {"Vek_Beetle", "Vek_Hornet", "Vek_Scarab"}
+    }
+    -- weaponDeck 此时未初始化，而是在在 ModsFirstLoadedHook 中初始化，这里也等到该时点后再初始化
+    modApi:addModsFirstLoadedHook(function()
+        for id, enabled in pairs(modApi.weaponDeck) do
+            local weapon = _G[id]
+            if enabled and self:IsValidWeapon(weapon) then
+                local class = self:GetWeaponClass(weapon)
+                if not self.Weapons[class] then
+                    self.Weapons[class] = {}
+                end
+                table.insert(self.Weapons[class], id)
             end
-            table.insert(self.Weapons[class], id)
         end
-    end
-    self.Weapons.TechnoVek = {"Vek_Beetle", "Vek_Hornet", "Vek_Scarab"}
+    end)
 
     modApi:addNextTurnHook(function(mission)
         if not mission.RndWeapons_Init then
