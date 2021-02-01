@@ -1,7 +1,7 @@
 local mod = {
     id = "RndSquad",
     name = "True Random Squad",
-    version = "0.5.0.20210130",
+    version = "0.5.1.20210201",
     requirements = {"kf_ModUtils"},
     modApiVersion = "2.5.4",
     icon = "img/icon.png",
@@ -217,7 +217,7 @@ function mod:initResources()
         },
         Animated = {
             PosX = -24,
-            PosY = -4,
+            PosY = -6,
             NumFrames = 5,
             Time = baseMechAnimTime + 0.2
         },
