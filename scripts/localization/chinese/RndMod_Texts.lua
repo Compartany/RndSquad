@@ -1,6 +1,6 @@
 return {
-    squad_pbr_name = "RND[type:PBR]",
     squad_prs_name = "RND[type:PRS]",
+    squad_pbr_name = "RND[type:PBR]",
     squad_pbs_name = "RND[type:PBS]",
     squad_description = "这些机甲掌握了随机的规律，它们总能从随机中找出最有用的武器。",
     mech_prime_name = "RND:PRIME",

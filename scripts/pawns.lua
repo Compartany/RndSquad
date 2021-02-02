@@ -1,5 +1,12 @@
 local this = {}
 
+function BoardPawn:IsRndActive()
+    if self:IsAbility("Shifty") and self:GetMoveSpeed() == 1 then
+        return false
+    end
+    return self:IsActive()
+end
+
 function BoardPawn:SetRndReactivated(reactive)
     local mission = GetCurrentMission()
     if mission and mission.RndReactivated then

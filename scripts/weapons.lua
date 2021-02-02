@@ -39,7 +39,7 @@ function RndWeaponReroll:GetTargetArea(point)
         local mission = GetCurrentMission()
         if mission and mission.RndWeaponReroll_Target then
             local pawn = Board:GetPawn(mission.RndWeaponReroll_Target)
-            if pawn and pawn:IsActive() then
+            if pawn and pawn:IsRndActive() then
                 local boardSize = Board:GetSize()
                 for x = 0, boardSize.x - 1 do
                     for y = 0, boardSize.y - 1 do
@@ -51,7 +51,7 @@ function RndWeaponReroll:GetTargetArea(point)
             local pawns = extract_table(Board:GetPawns(TEAM_MECH))
             for _, id in ipairs(pawns) do
                 local pawn = Board:GetPawn(id)
-                if pawn and pawn:IsActive() then
+                if pawn and pawn:IsRndActive() then
                     local weaponIds = rnd_modApiExt.pawn:getWeapons(id)
                     for _, weaponId in ipairs(weaponIds) do
                         local weapon = _G[weaponId]
@@ -194,7 +194,7 @@ function RndWeapon:GetSkillEffect_Inner(p1, p2)
                     local pawn = Board:GetPawn(%d)
                     if pawn then
                         local Weapons = mod_loader.mods.RndSquad.weapons
-                        local text = pawn:IsActive() and Weapons:GetPawnWeaponName(pawn) or nil
+                        local text = pawn:IsRndActive() and Weapons:GetPawnWeaponName(pawn) or nil
                         Weapons:SetHintText(pawn, text)
                     end
                 end
@@ -543,7 +543,7 @@ function this:InitHintText(checkActive)
     local pawns = extract_table(Board:GetPawns(TEAM_MECH))
     for _, id in ipairs(pawns) do
         local pawn = Board:GetPawn(id)
-        if pawn and (not checkActive or pawn:IsActive()) then
+        if pawn and (not checkActive or pawn:IsRndActive()) then
             local text = self:GetPawnWeaponName(pawn)
             if text then
                 self:SetHintText(pawn, text)
