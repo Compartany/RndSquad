@@ -19,14 +19,14 @@ return {
     RndWeaponBrute_Upgrade2 = "Upgrade 2",
     RndWeaponBrute_A_UpgradeDescription = "Random Brute class weapon Upgrade 1.",
     RndWeaponBrute_B_UpgradeDescription = "Random Brute class weapon Upgrade 2.",
-    
+
     RndWeaponRanged_Name = "RND[Ranged]",
     RndWeaponRanged_Description = "Use random Ranged class weapon.",
     RndWeaponRanged_Upgrade1 = "Upgrade 1",
     RndWeaponRanged_Upgrade2 = "Upgrade 2",
     RndWeaponRanged_A_UpgradeDescription = "Random Ranged class weapon Upgrade 1.",
     RndWeaponRanged_B_UpgradeDescription = "Random Ranged class weapon Upgrade 2.",
-    
+
     RndWeaponScience_Name = "RND[Science]",
     RndWeaponScience_Description = "Use random Science class weapon.",
     RndWeaponScience_Upgrade1 = "Upgrade 1",

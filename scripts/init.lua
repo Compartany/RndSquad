@@ -1,7 +1,7 @@
 local mod = {
     id = "RndSquad",
     name = "True Random Squad",
-    version = "0.5.5.20210202",
+    version = "0.5.6.20210203",
     requirements = {"kf_ModUtils"},
     modApiVersion = "2.5.4",
     icon = "img/icon.png",
@@ -23,8 +23,10 @@ function mod:init()
     RND_GLOBAL = {
         profileKey = profileKey,
         data = data,
-        weaponNames = {"RndWeaponReroll", "RndWeaponPrime", "RndWeaponBrute", "RndWeaponRanged", "RndWeaponScience",
-                       "RndWeaponAny", "RndWeaponTechnoVek"}
+        weaponNames = {
+            "RndWeaponReroll", "RndWeaponPrime", "RndWeaponBrute", "RndWeaponRanged", "RndWeaponScience",
+            "RndWeaponAny", "RndWeaponTechnoVek"
+        }
     }
 
     self:initLibs()
@@ -122,11 +124,8 @@ function mod:initResources()
     })
 
     local baseMechAnimTime = 1.2 -- 时间要错开，不然贼僵硬
-    require(self.scriptPath .. "libs/FURL")(mod, {{
-        Type = "mech",
+    require(self.scriptPath .. "libs/sprites").addMechs({
         Name = "RndMechPrime",
-        Filename = "RndMechPrime",
-        Path = "img/mechs/prime",
         Default = {
             PosX = -17,
             PosY = -1
@@ -151,10 +150,7 @@ function mod:initResources()
         },
         Icon = {}
     }, {
-        Type = "mech",
         Name = "RndMechBrute",
-        Filename = "RndMechBrute",
-        Path = "img/mechs/brute",
         Default = {
             PosX = -16,
             PosY = 8
@@ -179,10 +175,7 @@ function mod:initResources()
         },
         Icon = {}
     }, {
-        Type = "mech",
         Name = "RndMechRanged",
-        Filename = "RndMechRanged",
-        Path = "img/mechs/ranged",
         Default = {
             PosX = -17,
             PosY = 0
@@ -207,10 +200,7 @@ function mod:initResources()
         },
         Icon = {}
     }, {
-        Type = "mech",
         Name = "RndMechScience",
-        Filename = "RndMechScience",
-        Path = "img/mechs/science",
         Default = {
             PosX = -12,
             PosY = -6
@@ -230,7 +220,7 @@ function mod:initResources()
             PosY = -4
         },
         Icon = {}
-    }})
+    })
 end
 
 return mod

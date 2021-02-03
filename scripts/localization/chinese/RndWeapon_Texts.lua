@@ -19,19 +19,19 @@ return {
     RndWeaponBrute_Upgrade2 = "升级 2",
     RndWeaponBrute_A_UpgradeDescription = "随机野蛮类武器升级 1。",
     RndWeaponBrute_B_UpgradeDescription = "随机野蛮类武器升级 2。",
-    
+
     RndWeaponRanged_Name = "RND[Ranged]",
     RndWeaponRanged_Description = "使用随机远程类武器。",
     RndWeaponRanged_Upgrade1 = "升级 1",
     RndWeaponRanged_Upgrade2 = "升级 2",
     RndWeaponRanged_A_UpgradeDescription = "随机远程类武器升级 1。",
     RndWeaponRanged_B_UpgradeDescription = "随机远程类武器升级 2。",
-    
+
     RndWeaponScience_Name = "RND[Science]",
     RndWeaponScience_Description = "使用随机科学类武器。",
     RndWeaponScience_Upgrade1 = "升级 1 & 2",
     RndWeaponScience_A_UpgradeDescription = "随机科学类武器升级 1 和 升级 2。",
-    
+
     RndWeaponAny_Name = "RND[Any]",
     RndWeaponAny_Description = "使用随机任何类武器。",
     RndWeaponAny_Upgrade1 = "升级 1 & 2",
