@@ -26,7 +26,7 @@ end
 function this:HasWeapon(pawn, name, upgradeCheck)
     upgradeCheck = upgradeCheck or false
     if pawn then
-        local weapons = env_modApiExt.pawn:getWeapons(pawn:GetId())
+        local weapons = rnd_modApiExt.pawn:getWeapons(pawn:GetId())
         for _, weapon in ipairs(weapons) do
             local wp = upgradeCheck and weapon or self:ExtractWeapon(weapon)
             if wp == name then

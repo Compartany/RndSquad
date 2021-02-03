@@ -48,11 +48,10 @@ function this:LoadText(language)
 end
 
 function this:SetText()
-    for id, text in pairs(RndWeapon_Texts) do
-        modApi:setText(id, text)
-    end
-    for id, text in pairs(Rnd_Texts) do
-        modApi:setText(id, text)
+    for _, group in ipairs({Rnd_Texts, RndWeapon_Texts}) do
+        for id, text in pairs(group) do
+            modApi:setText(id, text)
+        end
     end
 
     -- for MOD Loader Weapon Deck
