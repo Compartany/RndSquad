@@ -1,6 +1,6 @@
 return {
     RndWeaponReroll_Name = "重掷",
-    RndWeaponReroll_Description = "在 3 条随机序列中切换。无使用次数限制，但每回合只能重复选择同一单位作为目标。机甲可在使用后再次行动。",
+    RndWeaponReroll_Description = "在 4 条随机序列中切换。无使用次数限制，但每回合只能重复选择同一单位作为目标。机甲可在使用后再次行动。",
     RndWeaponReroll_Upgrade1 = "+1 序列",
     RndWeaponReroll_Upgrade2 = "+1 序列",
     RndWeaponReroll_A_UpgradeDescription = "随机序列数加 1。",

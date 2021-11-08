@@ -1,6 +1,6 @@
 local mod = mod_loader.mods[modApi.currentMod]
 local tool = mod.tool
-local baseRandomSequenceNum = 3
+local baseRandomSequenceNum = 4
 
 local this = {
     HintPawnTypes = {},
@@ -377,7 +377,7 @@ RndWeaponBrute = RndWeapon:new{
     Icon = "weapons/RndWeaponBrute.png",
     PowerCost = 1,
     Upgrades = 2,
-    UpgradeCost = {1, 2}
+    UpgradeCost = {1, 1}
 }
 RndWeaponBrute_A = RndWeaponBrute:new{
     Upgrade = "A"
@@ -413,7 +413,7 @@ RndWeaponScience = RndWeapon:new{
     Icon = "weapons/RndWeaponScience.png",
     PowerCost = 1,
     Upgrades = 1,
-    UpgradeCost = {1}
+    UpgradeCost = {2}
 }
 RndWeaponScience_A = RndWeaponScience:new{
     Upgrade = "AB"
@@ -424,7 +424,7 @@ RndWeaponAny = RndWeapon:new{
     Icon = "weapons/RndWeaponAny.png",
     PowerCost = 1,
     Upgrades = 1,
-    UpgradeCost = {1},
+    UpgradeCost = {2},
     TipImage = {
         Unit = Point(2, 3),
         Enemy = Point(2, 2),

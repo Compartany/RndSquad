@@ -1,6 +1,6 @@
 return {
     RndWeaponReroll_Name = "Reroll",
-    RndWeaponReroll_Description = "Switch between 3 random sequences. No limit to the number of uses, but only one unit can be selected as the target repeatedly each turn. Mech can act again after use.",
+    RndWeaponReroll_Description = "Switch between 4 random sequences. No limit to the number of uses, but only one unit can be selected as the target repeatedly each turn. Mech can act again after use.",
     RndWeaponReroll_Upgrade1 = "+1 Sequence",
     RndWeaponReroll_Upgrade2 = "+1 Sequence",
     RndWeaponReroll_A_UpgradeDescription = "Increase number of random sequences by 1.",
