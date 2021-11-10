@@ -1,11 +1,12 @@
 local mod = {
     id = "RndSquad",
     name = "True Random Squad",
-    version = "1.0.0.20211108",
+    version = "1.0.1.20211110",
     requirements = {"kf_ModUtils"},
     modApiVersion = "2.6.3",
     icon = "img/icon.png",
-    author = "Compartany"
+    author = "Compartany",
+    description = "These Mechs have mastered the laws of randomness, and they can always find the most useful weapons from randomness."
 }
 print(mod.version) -- for package and release
 
