@@ -9,8 +9,8 @@ Link:
 Download:
     [github] https://github.com/Compartany/RndSquad/releases
     [weiyun] https://share.weiyun.com/7laJWpe3 (alternate)
-Other MODs:
-    [EnvManipulators] https://subsetgames.com/forum/viewtopic.php?f=25&t=36543
+My MODs:
+    https://github.com/Compartany/ITB-MODs/blob/main/mod-list.md
 
 These Mechs have mastered the laws of randomness, and they can always find the most useful weapons from randomness.
 

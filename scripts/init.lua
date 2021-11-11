@@ -1,7 +1,7 @@
 local mod = {
     id = "RndSquad",
     name = "True Random Squad",
-    version = "1.0.1.20211110",
+    version = "1.0.2.20211111",
     requirements = {"kf_ModUtils"},
     modApiVersion = "2.6.3",
     icon = "img/icon.png",

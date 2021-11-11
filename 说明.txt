@@ -9,8 +9,8 @@ MOD：真随机战队
 下载：
     [github] https://github.com/Compartany/RndSquad/releases
     [weiyun] https://share.weiyun.com/7laJWpe3 （备用）
-其他 MOD：
-    [环境操纵者] https://www.bilibili.com/read/cv9047965
+本人制作的 MOD：
+    https://github.com/Compartany/ITB-MODs/blob/main/mod-list.md
 
 这些机甲掌握了随机的规律，它们总能从随机中找出最有用的武器。
 
